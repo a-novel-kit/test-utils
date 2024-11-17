@@ -103,3 +103,29 @@ func TestSomething(t *testing.T) {
   testutils.WaitConn(t, conn)
 }
 ```
+
+# Misc
+
+## Chan utils
+
+Working with channels for test can be tedious, this package provides some helpers.
+
+```go
+package my_test
+
+import (
+  "testing"
+
+  "google.golang.org/grpc"
+
+  testutils "github.com/a-novel-kit/test-utils"
+)
+
+func TestSomething(t *testing.T) {
+  channel := make(chan string)
+  
+  // Send a message to the channel, in a separate, safe goroutine.
+  testutils.SendChan(channel, "Hello")
+  testutils.RequireChanEqual(t, channel, "Hello")
+}
+```
