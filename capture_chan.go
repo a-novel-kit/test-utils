@@ -37,7 +37,13 @@ func SendChan[T any](channel chan<- T, value T) {
 	}()
 }
 
-func RequireChan[T any](tb testing.TB, channel <-chan T, condition func(collect *assert.CollectT, value T)) {
+func RequireChanC[T any](
+	tb testing.TB,
+	channel <-chan T,
+	condition func(collect *assert.CollectT, value T),
+	timeout time.Duration,
+	interval time.Duration,
+) {
 	tb.Helper()
 
 	var dest T
@@ -46,5 +52,11 @@ func RequireChan[T any](tb testing.TB, channel <-chan T, condition func(collect 
 
 	require.EventuallyWithT(tb, func(collect *assert.CollectT) {
 		condition(collect, dest)
-	}, time.Second, 50*time.Millisecond)
+	}, timeout, interval)
+}
+
+func RequireChan[T any](tb testing.TB, channel <-chan T, condition func(collect *assert.CollectT, value T)) {
+	tb.Helper()
+
+	RequireChanC(tb, channel, condition, time.Second, 50*time.Millisecond)
 }
