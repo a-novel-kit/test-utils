@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -11,11 +12,8 @@ import (
 func CaptureChan[T any](channel <-chan T, dest *T) func() {
 	interrupt := make(chan bool)
 
-	// Read initial value.
-	select {
-	case *dest = <-channel:
-	default:
-	}
+	// Read initial value, if any.
+	*dest = <-channel
 
 	go func() {
 		for {
@@ -39,14 +37,14 @@ func SendChan[T any](channel chan<- T, value T) {
 	}()
 }
 
-func RequireChanEqual[T comparable](tb testing.TB, channel <-chan T, expected T) {
+func RequireChan[T any](tb testing.TB, channel <-chan T, condition func(collect *assert.CollectT, value T)) {
 	tb.Helper()
 
 	var dest T
 	clean := CaptureChan(channel, &dest)
 	defer clean()
 
-	require.Eventuallyf(tb, func() bool {
-		return dest == expected
-	}, time.Second, 50*time.Millisecond, "Expected %q, got %q", expected, dest)
+	require.EventuallyWithT(tb, func(collect *assert.CollectT) {
+		condition(collect, dest)
+	}, time.Second, 50*time.Millisecond)
 }
