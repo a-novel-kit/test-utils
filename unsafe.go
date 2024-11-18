@@ -9,7 +9,6 @@ import (
 
 var (
 	ErrFieldNotFound = errors.New("field not found")
-	ErrNonPtr        = errors.New("the first parameter must be a pointer")
 	ErrNonStructPtr  = errors.New("the first parameter must be a pointer to a struct")
 )
 
